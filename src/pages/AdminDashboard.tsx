@@ -18,9 +18,10 @@ const AdminDashboard = () => {
     prescriptionRequired: false,
     description: '',
     company: '',
+    imageUrl: '',
   });
 
-  const categories = ['Painkiller', 'Antibiotic', 'Fever', 'Diabetes', 'Heart', 'Vitamins'];
+  const categories = ['Painkiller', 'Antibiotic', 'Fever', 'Diabetes', 'Heart', 'Vitamins', 'Skincare', 'Surgical'];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +32,7 @@ const AdminDashboard = () => {
         ...medicine,
         createdAt: serverTimestamp(),
       });
-      setSuccess('Medicine added successfully!');
+      setSuccess('LOG: Medicine added to central database successfully.');
       setMedicine({
         name: '',
         category: 'Painkiller',
@@ -40,6 +41,7 @@ const AdminDashboard = () => {
         prescriptionRequired: false,
         description: '',
         company: '',
+        imageUrl: '',
       });
     } catch (err: any) {
       console.error(err);
@@ -52,11 +54,10 @@ const AdminDashboard = () => {
     setLoading(true);
     try {
       const sampleMeds = [
-        { name: 'Paracetamol 500mg', category: 'Painkiller', price: 5, stock: 500, prescriptionRequired: false, description: 'Relieves pain and reduces fever.', company: 'HealthCare Inc' },
-        { name: 'Amoxicillin 250mg', category: 'Antibiotic', price: 15, stock: 100, prescriptionRequired: true, description: 'Treats bacterial infections.', company: 'BioPharma' },
-        { name: 'Insulin Glargine', category: 'Diabetes', price: 45, stock: 50, prescriptionRequired: true, description: 'Long-acting insulin for diabetes control.', company: 'Novo Nord' },
-        { name: 'Vitamin C 1000mg', category: 'Vitamins', price: 10, stock: 200, prescriptionRequired: false, description: 'Boosts immune system.', company: 'ViraLife' },
-        { name: 'Atorvastatin 20mg', category: 'Heart', price: 25, stock: 80, prescriptionRequired: true, description: 'Lowers cholesterol and prevents heart disease.', company: 'CardioPlus' },
+        { name: 'Paracetamol 500mg', category: 'Painkiller', price: 5.99, stock: 500, prescriptionRequired: false, description: 'High-efficacy relief for pain and fever.', company: 'Panadol Labs', imageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=2670&auto=format&fit=crop' },
+        { name: 'Amoxicillin 250mg', category: 'Antibiotic', price: 15.50, stock: 120, prescriptionRequired: true, description: 'Broad-spectrum bacterial treatment protocol.', company: 'Pfizer Global', imageUrl: 'https://images.unsplash.com/photo-1471864190281-ad5f9f81ce4c?q=80&w=2670&auto=format&fit=crop' },
+        { name: 'Humalog Insulin', category: 'Diabetes', price: 89.99, stock: 45, prescriptionRequired: true, description: 'Fast-acting glucose regulation agent.', company: 'Eli Lilly', imageUrl: 'https://images.unsplash.com/photo-1550572017-ed2002b4fd87?q=80&w=2670&auto=format&fit=crop' },
+        { name: 'Vitamin D3+', category: 'Vitamins', price: 22.00, stock: 300, prescriptionRequired: false, description: 'Essential immune-support supplement.', company: 'Solgar', imageUrl: 'https://images.unsplash.com/photo-1576602976047-174e57a47881?q=80&w=2670&auto=format&fit=crop' },
       ];
 
       for (const med of sampleMeds) {
@@ -66,14 +67,13 @@ const AdminDashboard = () => {
         });
       }
 
-      // Also ensure my user is admin for testing
       if (user) {
         await setDoc(doc(db, 'users', user.uid), {
           role: UserRole.ADMIN,
         }, { merge: true });
       }
 
-      setSuccess('Sample data seeded successfully! (You are now Admin)');
+      setSuccess('SYSTEM: Sample data successfully integrated. Admin permissions enabled.');
     } catch (err) {
       console.error(err);
     } finally {
@@ -82,134 +82,191 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      <div className="max-w-4xl mx-auto px-4 py-12">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Admin Dashboard</h1>
-            <p className="text-gray-500 font-medium">Manage inventory and platform data</p>
+    <div className="p-4 md:p-8 space-y-8 flex-1 max-w-5xl mx-auto">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center shadow-lg shadow-slate-200">
+            <Database size={24} />
           </div>
-          <button
-            onClick={seedData}
-            disabled={loading}
-            className="flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-2xl hover:bg-gray-800 transition-all font-bold disabled:opacity-50"
-          >
-            <Database size={20} />
-            Seed Sample Data
-          </button>
+          <div>
+            <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Backend Operations</h1>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">Platform Management Terminal</p>
+          </div>
+        </div>
+        <button
+          onClick={seedData}
+          disabled={loading}
+          className="w-full md:w-auto flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-900 px-6 py-3 rounded-lg hover:bg-slate-50 transition-all font-bold text-xs uppercase tracking-widest disabled:opacity-50"
+        >
+          <Database size={16} />
+          Initialize Default Stock
+        </button>
+      </div>
+
+      {success && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="p-4 bg-blue-50 text-blue-700 rounded-lg flex items-center gap-3 text-[10px] font-black uppercase tracking-widest border border-blue-100"
+        >
+          <CheckCircle size={18} />
+          {success}
+        </motion.div>
+      )}
+
+      <div className="bg-white rounded-xl border border-slate-200 shadow-xl shadow-slate-100 overflow-hidden">
+        <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-blue-600 text-white rounded-lg flex items-center justify-center">
+              <Package size={16} />
+            </div>
+            <h2 className="text-sm font-black text-slate-900 uppercase">Input New Medicine Protocol</h2>
+          </div>
+          <div className="text-[8px] font-black text-slate-300 uppercase tracking-[0.3em]">Phase 1: Entry</div>
         </div>
 
-        {success && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8 p-4 bg-emerald-50 text-emerald-700 rounded-2xl flex items-center gap-3 font-bold border border-emerald-100"
-          >
-            <CheckCircle size={24} />
-            {success}
-          </motion.div>
-        )}
+        <form onSubmit={handleSubmit} className="p-8 grid grid-cols-1 md:grid-cols-6 gap-6">
+          <div className="md:col-span-4 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Entity Identification (Name)</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. PARACETAMOL EXTRA"
+                  className="w-full px-4 py-3 bg-slate-50 rounded-lg border-slate-200 focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition-all text-xs font-bold text-slate-900 border"
+                  value={medicine.name}
+                  onChange={(e) => setMedicine({ ...medicine, name: e.target.value })}
+                />
+              </div>
 
-        <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 p-8 border border-gray-100">
-          <div className="flex items-center gap-3 mb-8 pb-6 border-b border-gray-50">
-            <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
-              <Package size={24} />
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Classification (Category)</label>
+                <div className="relative">
+                  <select
+                    className="w-full px-4 py-3 bg-slate-50 rounded-lg border-slate-200 focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition-all text-xs font-bold text-slate-900 border appearance-none"
+                    value={medicine.category}
+                    onChange={(e) => setMedicine({ ...medicine, category: e.target.value })}
+                  >
+                    {categories.map(c => <option key={c} value={c}>{c.toUpperCase()}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Economic Value (USD)</label>
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                  className="w-full px-4 py-3 bg-slate-50 rounded-lg border-slate-200 focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition-all text-xs font-bold text-slate-900 border"
+                  value={medicine.price}
+                  onChange={(e) => setMedicine({ ...medicine, price: parseFloat(e.target.value) })}
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Inventory Depth (Stock)</label>
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  placeholder="100"
+                  className="w-full px-4 py-3 bg-slate-50 rounded-lg border-slate-200 focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition-all text-xs font-bold text-slate-900 border"
+                  value={medicine.stock}
+                  onChange={(e) => setMedicine({ ...medicine, stock: parseInt(e.target.value) })}
+                />
+              </div>
+
+              <div className="md:col-span-2 space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Visualization URL (Image)</label>
+                <input
+                  type="url"
+                  placeholder="https://images.unsplash.com/..."
+                  className="w-full px-4 py-3 bg-slate-50 rounded-lg border-slate-200 focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition-all text-xs font-bold text-slate-900 border"
+                  value={medicine.imageUrl}
+                  onChange={(e) => setMedicine({ ...medicine, imageUrl: e.target.value })}
+                />
+              </div>
+
+              <div className="md:col-span-2 space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Manufacturer (Company)</label>
+                <input
+                  type="text"
+                  placeholder="e.g. PHARMATECH INDUSTRIES"
+                  className="w-full px-4 py-3 bg-slate-50 rounded-lg border-slate-200 focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition-all text-xs font-bold text-slate-900 border"
+                  value={medicine.company}
+                  onChange={(e) => setMedicine({ ...medicine, company: e.target.value })}
+                />
+              </div>
+
+              <div className="md:col-span-2 space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Technical Brief (Description)</label>
+                <textarea
+                  placeholder="Enter medical datasheet information..."
+                  className="w-full px-4 py-3 bg-slate-50 rounded-lg border-slate-200 focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition-all text-xs font-bold text-slate-900 border h-24 resize-none"
+                  value={medicine.description}
+                  onChange={(e) => setMedicine({ ...medicine, description: e.target.value })}
+                />
+              </div>
+
+              <div className="md:col-span-2 flex items-center gap-3 py-2">
+                <input
+                  type="checkbox"
+                  id="rxReq"
+                  className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  checked={medicine.prescriptionRequired}
+                  onChange={(e) => setMedicine({ ...medicine, prescriptionRequired: e.target.checked })}
+                />
+                <label htmlFor="rxReq" className="text-[10px] font-black text-slate-700 uppercase tracking-widest cursor-pointer">Restricted Access (Prescription Required)</label>
+              </div>
             </div>
-            <h2 className="text-xl font-bold text-gray-900">Add New Medicine</h2>
           </div>
 
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700">Medicine Name</label>
-              <input
-                type="text"
-                required
-                className="w-full px-4 py-3.5 bg-gray-50 rounded-2xl border-transparent focus:bg-white focus:border-emerald-600 outline-none transition-all border"
-                value={medicine.name}
-                onChange={(e) => setMedicine({ ...medicine, name: e.target.value })}
-              />
+          <div className="md:col-span-2 space-y-6">
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Asset Preview</label>
+              <div className="aspect-square w-full bg-slate-50 rounded-xl border border-slate-200 border-dashed flex items-center justify-center overflow-hidden">
+                {medicine.imageUrl ? (
+                  <img src={medicine.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="text-center p-8">
+                    <Package size={32} className="text-slate-200 mx-auto mb-2" />
+                    <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest">Image Preview Area</span>
+                  </div>
+                )}
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700">Category</label>
-              <select
-                className="w-full px-4 py-3.5 bg-gray-50 rounded-2xl border-transparent focus:bg-white focus:border-emerald-600 outline-none transition-all border appearance-none"
-                value={medicine.category}
-                onChange={(e) => setMedicine({ ...medicine, category: e.target.value })}
-              >
-                {categories.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700">Price ($)</label>
-              <input
-                type="number"
-                required
-                min="0"
-                step="0.01"
-                className="w-full px-4 py-3.5 bg-gray-50 rounded-2xl border-transparent focus:bg-white focus:border-emerald-600 outline-none transition-all border"
-                value={medicine.price}
-                onChange={(e) => setMedicine({ ...medicine, price: parseFloat(e.target.value) })}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700">Stock Quantity</label>
-              <input
-                type="number"
-                required
-                min="0"
-                className="w-full px-4 py-3.5 bg-gray-50 rounded-2xl border-transparent focus:bg-white focus:border-emerald-600 outline-none transition-all border"
-                value={medicine.stock}
-                onChange={(e) => setMedicine({ ...medicine, stock: parseInt(e.target.value) })}
-              />
-            </div>
-
-            <div className="space-y-2 md:col-span-2">
-              <label className="text-sm font-bold text-gray-700">Company / Manufacturer</label>
-              <input
-                type="text"
-                className="w-full px-4 py-3.5 bg-gray-50 rounded-2xl border-transparent focus:bg-white focus:border-emerald-600 outline-none transition-all border"
-                value={medicine.company}
-                onChange={(e) => setMedicine({ ...medicine, company: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-2 md:col-span-2">
-              <label className="text-sm font-bold text-gray-700">Description</label>
-              <textarea
-                className="w-full px-4 py-3.5 bg-gray-50 rounded-2xl border-transparent focus:bg-white focus:border-emerald-600 outline-none transition-all border h-24"
-                value={medicine.description}
-                onChange={(e) => setMedicine({ ...medicine, description: e.target.value })}
-              />
-            </div>
-
-            <div className="flex items-center gap-3 md:col-span-2 mt-2">
-              <input
-                type="checkbox"
-                id="rxReq"
-                className="w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
-                checked={medicine.prescriptionRequired}
-                onChange={(e) => setMedicine({ ...medicine, prescriptionRequired: e.target.checked })}
-              />
-              <label htmlFor="rxReq" className="text-sm font-bold text-gray-700">Prescription Required</label>
+            <div className="p-4 bg-slate-50 rounded-lg border border-slate-100">
+              <h4 className="text-[10px] font-bold text-slate-900 uppercase tracking-widest mb-2 flex items-center gap-2">
+                <ArrowLeft size={12} className="rotate-90" />
+                Validation Protocol
+              </h4>
+              <ul className="text-[9px] text-slate-400 font-bold space-y-1 uppercase tracking-tight">
+                <li>• Name must be verified</li>
+                <li>• Stock cannot be negative</li>
+                <li>• Image should be 1:1 aspect</li>
+                <li>• System will timestamp on commit</li>
+              </ul>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="md:col-span-2 mt-4 bg-emerald-600 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100 disabled:opacity-50"
+              className="w-full bg-slate-900 text-white h-14 rounded-lg font-bold text-xs flex items-center justify-center gap-3 hover:bg-blue-600 transition-all uppercase tracking-widest active:scale-[0.98] disabled:opacity-50"
             >
-              {loading ? <Loader2 className="animate-spin" /> : (
+              {loading ? <Loader2 className="animate-spin w-4 h-4" /> : (
                 <>
-                  <Plus size={20} />
-                  Add Medicine to Inventory
+                  <Plus size={16} />
+                  Commit to Inventory
                 </>
               )}
             </button>
-          </form>
-        </div>
+          </div>
+        </form>
       </div>
     </div>
   );
