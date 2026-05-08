@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Medicine } from '../types';
 import { useCart } from '../context/CartContext';
-import { Search, Filter, ShoppingBag, Info, AlertCircle } from 'lucide-react';
+import { Search, Filter, ShoppingBag, Info, AlertCircle, Pill, TrendingUp, Users, Package, Clock, Star, ExternalLink } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
 
@@ -41,148 +41,216 @@ const Home = () => {
     return matchesSearch && matchesCategory;
   });
 
+  const metrics = [
+    { label: 'Daily Orders', value: '1,482', icon: ShoppingBag, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'Verified Patients', value: '12k+', icon: Users, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { label: 'Medicine Stock', value: '85,000+', icon: Package, color: 'text-amber-600', bg: 'bg-amber-50' },
+    { label: 'Average Delivery', value: '24m', icon: Clock, color: 'text-purple-600', bg: 'bg-purple-50' },
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      {/* Hero Section */}
-      <div className="bg-emerald-600 text-white py-12 md:py-20 mb-8 overflow-hidden relative">
-        <div className="max-w-7xl mx-auto px-4 relative z-10">
+    <div className="p-4 md:p-8 space-y-8">
+      {/* Metrics Row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {metrics.map((metric, i) => (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            key={metric.label}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center"
+            transition={{ delay: i * 0.1 }}
+            className="bg-white p-4 rounded-xl border border-slate-200 flex items-center justify-between shadow-sm"
           >
-            <h1 className="text-4xl md:text-6xl font-bold mb-4 tracking-tight">Your Health, Our Priority</h1>
-            <p className="text-emerald-100 text-lg md:text-xl max-w-2xl mx-auto mb-8">
-              Order medicines online and get them delivered to your doorstep. Safe, fast, and reliable service.
-            </p>
-            
-            <div className="max-w-xl mx-auto relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search medicines, health products..."
-                className="w-full pl-12 pr-4 py-4 rounded-xl text-gray-900 shadow-xl focus:ring-2 focus:ring-emerald-400 transition-all outline-none"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+            <div>
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">{metric.label}</div>
+              <div className="text-xl font-bold text-slate-900">{metric.value}</div>
+            </div>
+            <div className={cn("p-2 rounded-lg", metric.bg, metric.color)}>
+              <metric.icon size={20} />
             </div>
           </motion.div>
-        </div>
-        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500 rounded-full blur-3xl opacity-20 -mr-20 -mt-20"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-400 rounded-full blur-3xl opacity-10 -ml-32 -mb-32"></div>
+        ))}
       </div>
 
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* Sidebar Filters */}
-          <aside className="w-full md:w-64 shrink-0">
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 sticky top-24">
-              <div className="flex items-center gap-2 mb-6">
-                <Filter size={18} className="text-emerald-600" />
-                <h2 className="font-semibold text-gray-900">Categories</h2>
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        {/* Main Content Area */}
+        <div className="xl:col-span-2 space-y-8">
+          {/* Section Header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-slate-900 text-white rounded-lg flex items-center justify-center">
+                <Package size={20} />
               </div>
-              <div className="space-y-2">
-                {categories.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setCategory(cat)}
-                    className={cn(
-                      "w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-all",
-                      category === cat
-                        ? "bg-emerald-50 text-emerald-700"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                    )}
-                  >
-                    {cat}
+              <div>
+                <h2 className="text-xl font-bold text-slate-900 leading-tight">Medicine Inventory</h2>
+                <p className="text-xs text-slate-500 font-medium">Browse and search for verified pharmaceutical products</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <div className="hidden sm:flex bg-white border border-slate-200 rounded-lg p-1">
+                {['Grid', 'List'].map(mode => (
+                  <button key={mode} className={cn("px-3 py-1 text-[10px] font-bold rounded-md transition-all", mode === 'Grid' ? 'bg-slate-900 text-white' : 'text-slate-400 hover:text-slate-600')}>
+                    {mode.toUpperCase()}
                   </button>
                 ))}
               </div>
             </div>
-          </aside>
+          </div>
 
-          {/* Medicine Grid */}
-          <main className="flex-1">
-            {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[1, 2, 3, 4, 5, 6].map((n) => (
-                  <div key={n} className="bg-white rounded-2xl p-4 h-80 animate-pulse border border-gray-100">
-                    <div className="bg-gray-200 h-40 rounded-xl mb-4"></div>
-                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+          {/* Catalog Selection */}
+          <div className="flex flex-wrap gap-2 pb-2">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setCategory(cat)}
+                className={cn(
+                  "px-4 py-2 rounded-lg text-xs font-bold transition-all border",
+                  category === cat
+                    ? "bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-100"
+                    : "bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700"
+                )}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          {/* Medicine List */}
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[1, 2, 3, 4].map((n) => (
+                <div key={n} className="bg-white rounded-xl p-4 h-48 animate-pulse border border-slate-100" />
+              ))}
+            </div>
+          ) : filteredMedicines.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {filteredMedicines.map((med, index) => (
+                <motion.div
+                  key={med.id}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="bg-white rounded-xl p-4 border border-slate-200 hover:border-blue-400 transition-all group flex flex-col sm:flex-row gap-4 relative"
+                >
+                  <div className="w-full sm:w-24 h-24 bg-slate-50 rounded-lg flex items-center justify-center shrink-0 overflow-hidden border border-slate-100">
+                    {med.imageUrl ? (
+                      <img src={med.imageUrl} alt={med.name} className="w-full h-full object-cover group-hover:scale-110 transition-duration-300" referrerPolicy="no-referrer" />
+                    ) : (
+                      <Pill size={32} className="text-slate-200" />
+                    )}
                   </div>
-                ))}
-              </div>
-            ) : filteredMedicines.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredMedicines.map((med, index) => (
-                  <motion.div
-                    key={med.id}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 group hover:shadow-md transition-all flex flex-col"
-                  >
-                    <div className="relative aspect-square mb-4 overflow-hidden rounded-xl bg-gray-50">
-                      {med.imageUrl ? (
-                        <img
-                          src={med.imageUrl}
-                          alt={med.name}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          referrerPolicy="no-referrer"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-300">
-                          <Pill size={48} />
-                        </div>
-                      )}
+                  
+                  <div className="flex-1 flex flex-col">
+                    <div className="flex justify-between items-start mb-1">
+                      <div className="text-[10px] font-extrabold text-blue-600 uppercase tracking-widest">{med.category}</div>
                       {med.prescriptionRequired && (
-                        <div className="absolute top-2 left-2 bg-red-100 text-red-600 text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1">
-                          <AlertCircle size={10} />
-                          PRESCRIPTION REQ
-                        </div>
+                        <div className="bg-red-50 text-red-600 text-[8px] font-black px-1.5 py-0.5 rounded border border-red-100">RX REQUIRED</div>
                       )}
-                      <div className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm text-emerald-600 text-xs font-bold px-3 py-1 rounded-full">
-                        {med.stock > 0 ? 'In Stock' : 'Out of Stock'}
-                      </div>
                     </div>
+                    <h3 className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{med.name}</h3>
+                    <p className="text-xs text-slate-500 mb-4 line-clamp-1">{med.description || 'Verified pharmaceutical product'}</p>
                     
-                    <div className="flex-1">
-                      <span className="text-[10px] uppercase tracking-widest text-emerald-600 font-bold mb-1 block">{med.category}</span>
-                      <h3 className="font-bold text-gray-900 group-hover:text-emerald-700 transition-colors">{med.name}</h3>
-                      <p className="text-gray-500 text-sm mb-4 line-clamp-2">{med.description || 'Generic healthcare product'}</p>
-                    </div>
-
-                    <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-50">
-                      <div>
-                        <span className="text-xs text-gray-400 block">Price</span>
-                        <span className="text-lg font-bold text-gray-900">${med.price}</span>
+                    <div className="mt-auto flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] text-slate-400 font-bold">UNIT PRICE</span>
+                        <span className="text-lg font-black text-slate-900">${med.price}</span>
                       </div>
                       <button
                         onClick={() => addToCart(med)}
                         disabled={med.stock <= 0}
                         className={cn(
-                          "p-3 rounded-xl transition-all shadow-sm",
+                          "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all",
                           med.stock > 0
-                            ? "bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95"
-                            : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                            ? "bg-slate-900 text-white hover:bg-blue-600 active:scale-95"
+                            : "bg-slate-100 text-slate-400 cursor-not-allowed"
                         )}
                       >
-                        <ShoppingBag size={20} />
+                        <ShoppingBag size={14} />
+                        ADD
                       </button>
                     </div>
-                  </motion.div>
-                ))}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-20 bg-white rounded-2xl border border-slate-200">
+              <Info size={40} className="mx-auto text-slate-200 mb-4" />
+              <h3 className="text-lg font-bold text-slate-900 mb-1">Empty Stock</h3>
+              <p className="text-xs text-slate-400">No medicines found for selected filters.</p>
+            </div>
+          )}
+        </div>
+
+        {/* Sidebar Widgets */}
+        <div className="space-y-8">
+          {/* Trending Medicines Table */}
+          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <TrendingUp size={16} className="text-blue-600" />
+                <h3 className="text-sm font-bold text-slate-900">Trending Now</h3>
               </div>
-            ) : (
-              <div className="text-center py-20 bg-white rounded-3xl border border-gray-100">
-                <Info size={48} className="mx-auto text-gray-200 mb-4" />
-                <h3 className="text-xl font-bold text-gray-900 mb-2">No Medicines Found</h3>
-                <p className="text-gray-500 max-w-sm mx-auto">
-                  We couldn't find any medicines matching your search. Try different keywords or categories.
-                </p>
+              <div className="text-[10px] font-bold text-blue-600 cursor-pointer hover:underline">VIEW ALL</div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="bg-slate-50 text-slate-400 uppercase font-bold tracking-tighter">
+                    <th className="px-4 py-2">Medicine</th>
+                    <th className="px-4 py-2">Sales</th>
+                    <th className="px-4 py-2 text-right">Trend</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {medicines.slice(0, 5).map((med, i) => (
+                    <tr key={med.id} className="hover:bg-slate-50 transition-colors cursor-pointer group">
+                      <td className="px-4 py-3">
+                        <div className="font-bold text-slate-800 group-hover:text-blue-600">{med.name}</div>
+                        <div className="text-[10px] text-slate-400">{med.category}</div>
+                      </td>
+                      <td className="px-4 py-3 font-medium text-slate-600">{Math.floor(Math.random() * 500) + 100}</td>
+                      <td className="px-4 py-3 text-right">
+                        <span className="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full font-bold text-[10px]">+{Math.floor(Math.random() * 20) + 5}%</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Quick Support Card */}
+          <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl p-6 text-white shadow-xl shadow-blue-100 relative overflow-hidden">
+            <div className="relative z-10">
+              <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-lg flex items-center justify-center mb-4">
+                <Star size={20} className="text-white fill-white" />
               </div>
-            )}
-          </main>
+              <h3 className="text-lg font-bold mb-2 leading-tight">MediQuick Premium Membership</h3>
+              <p className="text-xs text-blue-100 mb-6 opacity-80 leading-relaxed">Get unlimited free home deliveries and 15% instant discount on all orders.</p>
+              <button className="w-full py-3 bg-white text-blue-700 text-xs font-bold rounded-lg hover:bg-blue-50 transition-all uppercase tracking-wide">
+                Join Now • $9.99/mo
+              </button>
+            </div>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-16 -mt-16"></div>
+          </div>
+
+          {/* Latest News / Tips */}
+          <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-4">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertCircle size={16} className="text-amber-500" />
+              <h3 className="text-sm font-bold text-slate-900">Health Awareness</h3>
+            </div>
+            {[
+              "Why seasonal flu vaccines are important this year.",
+              "Top 5 habits for better heart health.",
+              "Understanding your blood sugar levels.",
+            ].map((tip, i) => (
+              <div key={i} className="flex gap-3 group cursor-pointer">
+                <div className="w-8 h-8 rounded bg-slate-50 flex-none flex items-center justify-center text-[10px] font-bold text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600">0{i+1}</div>
+                <div className="text-[11px] font-medium text-slate-600 group-hover:text-slate-900 leading-tight pt-1">{tip}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

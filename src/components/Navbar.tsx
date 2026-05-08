@@ -1,13 +1,15 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { auth } from '../lib/firebase';
-import { Pill, ShoppingCart, User, LogOut, Menu, X, ClipboardList, Shield } from 'lucide-react';
+import { Pill, ShoppingCart, User, LogOut, Menu, X, Shield, LayoutDashboard, Database, Info, MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { cn } from '../lib/utils';
 
-const Navbar = () => {
-  const { user, userData, isAdmin, isPharmacist } = useAuth();
+const Sidebar = () => {
+  const { user, userData, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isOpen, setIsOpen] = React.useState(false);
 
   const handleLogout = async () => {
@@ -15,88 +17,109 @@ const Navbar = () => {
     navigate('/');
   };
 
+  const navItems = [
+    { label: 'Medicines', path: '/', icon: LayoutDashboard },
+    { label: 'My Profile', path: '/profile', icon: User, protected: true },
+    { label: 'Cart', path: '/cart', icon: ShoppingCart, protected: true },
+    { label: 'About Us', path: '/about', icon: Info },
+  ];
+
+  if (isAdmin) {
+    navItems.push({ label: 'Admin Panel', path: '/admin', icon: Shield, protected: true });
+  }
+
+  const NavLink = (props: any) => {
+    const { item } = props;
+    const isActive = location.pathname === item.path;
+    return (
+      <Link
+        to={item.path}
+        className={cn(
+          "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+          isActive 
+            ? "bg-blue-50 text-blue-700 font-bold" 
+            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+        )}
+      >
+        <item.icon className="w-4 h-4" />
+        {item.label}
+      </Link>
+    );
+  };
+
   return (
-    <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center gap-2">
-              <Pill className="text-emerald-600 w-8 h-8" />
-              <span className="font-bold text-xl tracking-tight text-gray-900">MediQuick</span>
-            </Link>
-          </div>
+    <>
+      {/* Mobile Toggle */}
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="md:hidden fixed top-4 right-4 z-[60] bg-white p-2 rounded-lg shadow-md border border-slate-200"
+      >
+        {isOpen ? <X size={20} /> : <Menu size={20} />}
+      </button>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-gray-600 hover:text-emerald-600 transition-colors">Medicines</Link>
-            <Link to="/about" className="text-gray-600 hover:text-emerald-600 transition-colors">About</Link>
-            
-            {user ? (
-              <>
-                <Link to="/cart" className="relative group">
-                  <ShoppingCart className="text-gray-600 group-hover:text-emerald-600 transition-colors" />
-                </Link>
-                <div className="flex items-center gap-4">
-                  {isAdmin && (
-                    <Link to="/admin" className="p-2 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-all">
-                      <Shield size={20} />
-                    </Link>
-                  )}
-                  <Link to="/profile" className="flex items-center gap-2 text-gray-700 hover:text-emerald-600">
-                    <User size={20} />
-                    <span className="text-sm font-medium">{userData?.name || 'Profile'}</span>
-                  </Link>
-                  <button onClick={handleLogout} className="text-gray-500 hover:text-red-600 transition-colors">
-                    <LogOut size={20} />
-                  </button>
-                </div>
-              </>
-            ) : (
-              <div className="flex items-center gap-4">
-                <Link to="/login" className="text-gray-600 hover:text-emerald-600 font-medium">Login</Link>
-                <Link to="/register" className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-all font-medium">Get Started</Link>
-              </div>
-            )}
+      {/* Sidebar */}
+      <aside className={cn(
+        "fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 flex flex-col transition-transform duration-300 md:translate-x-0",
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      )}>
+        <div className="p-6 flex items-center gap-3">
+          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold shadow-lg shadow-blue-200">
+            <Pill size={18} />
           </div>
+          <span className="font-bold text-xl tracking-tight text-slate-800">MediQuick</span>
+        </div>
+        
+        <nav className="flex-1 px-4 space-y-1">
+          <div className="text-[10px] uppercase font-bold text-slate-400 px-2 mb-2 tracking-wider mt-4">Main Menu</div>
+          {navItems.map((item) => (
+            (!item.protected || user) && <NavLink key={item.path} item={item} />
+          ))}
 
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
-            <button onClick={() => setIsOpen(!isOpen)} className="text-gray-600">
-              {isOpen ? <X /> : <Menu />}
+          {!user && (
+            <div className="pt-4 space-y-1">
+              <div className="text-[10px] uppercase font-bold text-slate-400 px-2 mb-2 tracking-wider">Account</div>
+              <Link to="/login" className="flex items-center gap-3 px-3 py-2 text-slate-600 hover:bg-slate-50 rounded-lg text-sm font-medium">
+                Login
+              </Link>
+              <Link to="/register" className="flex items-center gap-3 px-3 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium">
+                Register
+              </Link>
+            </div>
+          )}
+        </nav>
+
+        {user && (
+          <div className="p-4 border-t border-slate-100 mb-4">
+            <button 
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg text-sm font-medium transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              Sign Out
+            </button>
+          </div>
+        )}
+
+        <div className="p-4 border-t border-slate-200">
+          <div className="bg-slate-900 rounded-xl p-4 text-white">
+            <div className="text-xs opacity-60 mb-1">Pharmacist Support</div>
+            <div className="text-sm font-semibold mb-3">Live Consultation</div>
+            <button className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-xs font-bold rounded-lg uppercase tracking-wide transition-all active:scale-95">
+              Start Chat
             </button>
           </div>
         </div>
-      </div>
+      </aside>
 
-      {/* Mobile Nav */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-white border-b border-gray-100"
-          >
-            <div className="px-4 py-6 space-y-4">
-              <Link to="/" onClick={() => setIsOpen(false)} className="block text-lg font-medium text-gray-900 text-center py-2">Medicines</Link>
-              {user ? (
-                <>
-                  <Link to="/cart" onClick={() => setIsOpen(false)} className="block text-center py-2">Cart</Link>
-                  <Link to="/profile" onClick={() => setIsOpen(false)} className="block text-center py-2">Profile</Link>
-                  <button onClick={handleLogout} className="w-full text-center py-2 text-red-600">Logout</button>
-                </>
-              ) : (
-                <>
-                  <Link to="/login" onClick={() => setIsOpen(false)} className="block text-center py-2">Login</Link>
-                  <Link to="/register" onClick={() => setIsOpen(false)} className="block text-center bg-emerald-600 text-white py-2 rounded-lg">Register</Link>
-                </>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </nav>
+      {/* Overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 md:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+    </>
   );
 };
 
-export default Navbar;
+export default Sidebar;

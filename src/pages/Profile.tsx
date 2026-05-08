@@ -1,8 +1,9 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'motion/react';
-import { User, Mail, Calendar, ShieldCheck, MapPin, Phone, Package } from 'lucide-react';
+import { User, Mail, Calendar, ShieldCheck, MapPin, Phone, Package, Star, Settings } from 'lucide-react';
 import OrderHistory from '../components/OrderHistory';
+import { cn } from '../lib/utils';
 
 const Profile = () => {
   const { userData, user } = useAuth();
@@ -10,93 +11,101 @@ const Profile = () => {
   if (!userData) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      <div className="max-w-4xl mx-auto px-4 py-12">
-        <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100 mb-8">
-          <div className="flex flex-col md:flex-row items-center gap-8 border-b border-gray-50 pb-8 mb-8">
-            <div className="w-24 h-24 rounded-3xl bg-emerald-100 flex items-center justify-center text-emerald-600 text-3xl font-bold border-4 border-white shadow-lg">
-              {userData.name?.charAt(0) || 'U'}
+    <div className="p-4 md:p-8 space-y-8 flex-1">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-slate-900 text-white rounded-lg flex items-center justify-center shadow-lg shadow-slate-200">
+            <User size={20} />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-slate-900">Patient Dashboard</h1>
+            <p className="text-xs text-slate-400 font-medium">Manage your medical profile and order history</p>
+          </div>
+        </div>
+        <button className="hidden sm:flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-xs font-bold text-slate-500 hover:bg-slate-50 transition-all">
+          <Settings size={14} />
+          Account Settings
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+        <div className="xl:col-span-4 space-y-8">
+          {/* Main Identity Card */}
+          <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-16 h-16 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 text-2xl font-black border border-blue-100">
+                {userData.name?.charAt(0) || 'U'}
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-slate-900 leading-tight">{userData.name}</h2>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
+                    {userData.role}
+                  </span>
+                  <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase">
+                    <Star size={10} className="text-amber-400 fill-amber-400" />
+                    Verified Patient
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="text-center md:text-left">
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-2">
-                <h1 className="text-3xl font-bold text-gray-900 tracking-tight">{userData.name}</h1>
-                <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full uppercase tracking-wider">
-                  {userData.role}
+
+            <div className="space-y-4 pt-6 border-t border-slate-50">
+              <div className="flex items-center justify-between text-xs font-medium">
+                <span className="text-slate-400 flex items-center gap-2"><Mail size={14} /> Email Address</span>
+                <span className="text-slate-900">{user?.email}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs font-medium">
+                <span className="text-slate-400 flex items-center gap-2"><Phone size={14} /> Contact Number</span>
+                <span className="text-slate-900">{userData.phoneNumber || 'Not Set'}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs font-medium">
+                <span className="text-slate-400 flex items-center gap-2"><Calendar size={14} /> Member Since</span>
+                <span className="text-slate-900">
+                  {userData.createdAt?.toDate ? userData.createdAt.toDate().toLocaleDateString() : '2024'}
                 </span>
               </div>
-              <p className="text-gray-500 font-medium flex items-center justify-center md:justify-start gap-2">
-                <Mail size={16} />
-                {user?.email}
-              </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-6">
-              <h2 className="text-lg font-bold text-gray-900 border-l-4 border-emerald-500 pl-3">Account Details</h2>
-              
-              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-transparent hover:border-gray-100 transition-all">
-                <ShieldCheck className="text-emerald-500" />
-                <div>
-                  <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Account ID</p>
-                  <p className="text-sm font-medium text-gray-700 font-mono">{user?.uid.substring(0, 10)}...</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-transparent hover:border-gray-100 transition-all">
-                <Calendar className="text-emerald-500" />
-                <div>
-                  <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Joined On</p>
-                  <p className="text-sm font-medium text-gray-700">
-                    {userData.createdAt?.toDate ? userData.createdAt.toDate().toLocaleDateString() : 'Recently'}
-                  </p>
-                </div>
-              </div>
+          {/* Delivery Address Card */}
+          <div className="bg-slate-900 rounded-xl p-6 text-white shadow-xl shadow-slate-200">
+            <div className="flex items-center gap-3 mb-4">
+              <MapPin size={18} className="text-blue-400" />
+              <h3 className="text-sm font-bold uppercase tracking-widest opacity-60">Permanent Address</h3>
             </div>
-
-            <div className="space-y-6">
-              <h2 className="text-lg font-bold text-gray-900 border-l-4 border-emerald-500 pl-3">Contact Information</h2>
-              
-              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-transparent hover:border-gray-100 transition-all">
-                <Phone className="text-emerald-500" />
-                <div>
-                  <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Phone</p>
-                  <p className="text-sm font-medium text-gray-700">{userData.phoneNumber || 'Not provided'}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-transparent hover:border-gray-100 transition-all">
-                <MapPin className="text-emerald-500" />
-                <div>
-                  <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Default Address</p>
-                  <p className="text-sm font-medium text-gray-700">{userData.address || 'Not provided'}</p>
-                </div>
-              </div>
-            </div>
+            <p className="text-xs font-medium leading-relaxed opacity-80 mb-6">
+              {userData.address || 'No shipping address provided yet. Please update your settings for faster checkouts.'}
+            </p>
+            <button className="w-full py-2 bg-white/10 hover:bg-white/20 text-white text-[10px] font-bold rounded uppercase tracking-widest border border-white/5 transition-all">
+              Update Address
+            </button>
           </div>
         </div>
 
-        {/* Order History */}
-        <div className="space-y-6 mb-8">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Recent Orders</h2>
-            <div className="px-4 py-1 bg-gray-100 rounded-full text-xs font-bold text-gray-400 uppercase tracking-widest">Live Updates</div>
+        <div className="xl:col-span-8 flex flex-col gap-8">
+          <div className="flex items-center justify-between px-2">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
+                <Package size={16} />
+              </div>
+              <h2 className="text-lg font-black text-slate-900 uppercase tracking-tight">Recent Orders</h2>
+            </div>
+            <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+              Real-time Tracker
+            </div>
           </div>
 
           <OrderHistory />
-        </div>
 
-        <div className="bg-emerald-600 rounded-3xl p-8 text-white relative overflow-hidden group">
-          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div>
-              <h3 className="text-2xl font-bold mb-2">Need Help?</h3>
-              <p className="text-emerald-100 opacity-80">Our pharmacists are available 24/7 for consultations.</p>
-            </div>
-            <button className="bg-white text-emerald-600 px-8 py-3 rounded-2xl font-bold hover:scale-105 transition-all shadow-lg active:scale-95">
-              Contact Support
+          <div className="bg-white rounded-xl border border-slate-200 border-dashed p-12 text-center">
+            <h3 className="text-sm font-bold text-slate-900 mb-2">Need a medical report?</h3>
+            <p className="text-[11px] text-slate-400 mb-6 mx-auto max-w-xs">Download your full prescription and order history for medical or insurance purposes.</p>
+            <button className="px-6 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-bold rounded uppercase tracking-widest transition-all">
+              Generate PDF Report
             </button>
           </div>
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32 group-hover:scale-110 transition-transform duration-700"></div>
         </div>
       </div>
     </div>

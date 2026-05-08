@@ -6,8 +6,9 @@ import { db, storage, auth } from '../lib/firebase';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { OrderStatus, PaymentMethod } from '../types';
-import { CreditCard, Truck, Upload, Loader2, CheckCircle, Package } from 'lucide-react';
+import { CreditCard, Truck, Upload, Loader2, CheckCircle, Package, Pill, Search } from 'lucide-react';
 import { motion } from 'motion/react';
+import { cn } from '../lib/utils';
 
 const Checkout = () => {
   const { items, totalPrice, clearCart } = useCart();
