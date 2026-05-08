@@ -1,0 +1,96 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Represents a user of the pharmacy platform.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["customer", "pharmacist", "admin", "delivery"] },
+        "createdAt": { "type": "string", "description": "ISO timestamp" }
+      },
+      "required": ["name", "email", "role", "createdAt"]
+    },
+    "Medicine": {
+      "title": "Medicine",
+      "description": "Details about a medicine available for purchase.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "price": { "type": "number" },
+        "stock": { "type": "integer" },
+        "expiryDate": { "type": "string" },
+        "company": { "type": "string" },
+        "prescriptionRequired": { "type": "boolean" },
+        "imageUrl": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "required": ["name", "category", "price", "stock", "prescriptionRequired"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Information about a customer order.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "totalPrice": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "processing", "shipped", "delivered", "cancelled"] },
+        "paymentMethod": { "type": "string", "enum": ["COD", "Mobile", "Card"] },
+        "deliveryAddress": { "type": "string" },
+        "phoneNumber": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["userId", "totalPrice", "status", "paymentMethod", "deliveryAddress", "phoneNumber", "createdAt"]
+    },
+    "OrderItem": {
+      "title": "Order Item",
+      "description": "Individual items within an order.",
+      "type": "object",
+      "properties": {
+        "medicineId": { "type": "string" },
+        "quantity": { "type": "integer" },
+        "priceAtTime": { "type": "number" }
+      },
+      "required": ["medicineId", "quantity", "priceAtTime"]
+    },
+    "Prescription": {
+      "title": "Prescription",
+      "description": "An uploaded prescription for verification.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "orderId": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "feedback": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["userId", "orderId", "imageUrl", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles."
+    },
+    "/medicines/{medicineId}": {
+      "schema": "Medicine",
+      "description": "Medicine inventory."
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Customer orders."
+    },
+    "/orders/{orderId}/items/{itemId}": {
+      "schema": "OrderItem",
+      "description": "Items associated with an order."
+    },
+    "/prescriptions/{prescriptionId}": {
+      "schema": "Prescription",
+      "description": "Prescription records for specific orders."
+    }
+  }
+}
