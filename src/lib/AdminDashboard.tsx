@@ -68,9 +68,9 @@ const AdminDashboard = () => {
       }
 
       if (user) {
-        await setDoc(doc(db, 'users',"PQPBq7ptgFhJ9j0eSJd3VnhX9mK2"), {
-          role: UserRole.ADMIN,
-        }, { merge: true });
+       await setDoc(doc(db, "users", "PQPBq7ptgFhJ9j0eSJd3VnhX9mK2"), {
+   role: "admin"
+}, { merge: true });
       }
 
       setSuccess('SYSTEM: Sample data successfully integrated. Admin permissions enabled.');
